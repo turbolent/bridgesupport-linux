@@ -977,7 +977,7 @@ SWIG_UnpackDataName(const char *c, void *ptr, size_t sz, const char *name) {
  * can be passed as an argument to API functions like Data_Wrap_Struct()
  * and Data_Make_Struct().
  */
- 
+
 #ifdef __cplusplus
 #  ifndef RUBY_METHOD_FUNC /* These definitions should work for Ruby 1.4.6 */
 #    define PROTECTFUNC(f) ((VALUE (*)()) f)
@@ -1039,7 +1039,7 @@ static VALUE _mSWIG = Qnil;
    exceptions.  Note this only works for C++ since a global cannot be
    initialized by a function in C.  For C, fallback to rb_eRuntimeError.*/
 
-SWIGINTERN VALUE 
+SWIGINTERN VALUE
 getNullReferenceError(void) {
   static int init = 0;
   static VALUE rb_eNullReferenceError ;
@@ -1048,9 +1048,9 @@ getNullReferenceError(void) {
     rb_eNullReferenceError = rb_define_class("NullReferenceError", rb_eRuntimeError);
   }
   return rb_eNullReferenceError;
-} 
+}
 
-SWIGINTERN VALUE 
+SWIGINTERN VALUE
 getObjectPreviouslyDeletedError(void) {
   static int init = 0;
   static VALUE rb_eObjectPreviouslyDeleted ;
@@ -1059,7 +1059,7 @@ getObjectPreviouslyDeletedError(void) {
     rb_eObjectPreviouslyDeleted = rb_define_class("ObjectPreviouslyDeleted", rb_eRuntimeError);
   }
   return rb_eObjectPreviouslyDeleted;
-} 
+}
 
 
 SWIGINTERN VALUE
@@ -1118,10 +1118,10 @@ SWIG_Ruby_ErrorType(int SWIG_code) {
 /* This function is called when a user inputs a wrong argument to
    a method.
  */
-SWIGINTERN 
+SWIGINTERN
 const char* Ruby_Format_TypeError( const char* msg,
-				   const char* type, 
-				   const char* name, 
+				   const char* type,
+				   const char* name,
 				   const int argn,
 				   VALUE input )
 {
@@ -1166,17 +1166,17 @@ const char* Ruby_Format_TypeError( const char* msg,
 }
 
 /* This function is called when an overloaded method fails */
-SWIGINTERN 
+SWIGINTERN
 void Ruby_Format_OverloadedError(
 				 const int argc,
 				 const int maxargs,
-				 const char* method, 
-				 const char* prototypes 
+				 const char* method,
+				 const char* prototypes
 				 )
 {
   const char* msg = "Wrong # of arguments";
   if ( argc <= maxargs ) msg = "Wrong arguments";
-  rb_raise(rb_eArgError,"%s for overloaded method '%s'.\n"  
+  rb_raise(rb_eArgError,"%s for overloaded method '%s'.\n"
 	   "Possible C/C++ prototypes are:\n%s",
 	   msg, method, prototypes);
 }
@@ -1184,7 +1184,7 @@ void Ruby_Format_OverloadedError(
 /* -----------------------------------------------------------------------------
  * rubytracking.swg
  *
- * This file contains support for tracking mappings from 
+ * This file contains support for tracking mappings from
  * Ruby objects to C++ objects.  This functionality is needed
  * to implement mark functions for Ruby's mark and sweep
  * garbage collector.
@@ -1207,7 +1207,7 @@ extern "C" {
 
 
 /* Global Ruby hash table to store Trackings from C/C++
-   structs to Ruby Objects. 
+   structs to Ruby Objects.
 */
 static VALUE swig_ruby_trackings = Qnil;
 
@@ -1217,10 +1217,10 @@ static ID swig_ruby_hash_delete;
 
 /* Setup a Ruby hash table to store Trackings */
 SWIGRUNTIME void SWIG_RubyInitializeTrackings(void) {
-  /* Create a ruby hash table to store Trackings from C++ 
+  /* Create a ruby hash table to store Trackings from C++
      objects to Ruby objects. */
 
-  /* Try to see if some other .so has already created a 
+  /* Try to see if some other .so has already created a
      tracking hash table, which we keep hidden in an instance var
      in the SWIG module.
      This is done to allow multiple DSOs to share the same
@@ -1232,7 +1232,7 @@ SWIGRUNTIME void SWIG_RubyInitializeTrackings(void) {
   swig_ruby_trackings = rb_ivar_get( _mSWIG, trackings_id );
   rb_gv_set("VERBOSE", verbose);
 
-  /* No, it hasn't.  Create one ourselves */ 
+  /* No, it hasn't.  Create one ourselves */
   if ( swig_ruby_trackings == Qnil )
     {
       swig_ruby_trackings = rb_hash_new();
@@ -1299,7 +1299,7 @@ SWIGRUNTIME VALUE SWIG_RubyInstanceFor(void* ptr) {
 
   /* Now lookup the value stored in the global hash table */
   VALUE value = rb_hash_aref(swig_ruby_trackings, key);
-	
+
   if (value == Qnil) {
     /* No object exists - return nil. */
     return Qnil;
@@ -1419,18 +1419,18 @@ SWIG_Ruby_AppendOutput(VALUE target, VALUE o) {
 
 /* Error manipulation */
 
-#define SWIG_ErrorType(code)                            SWIG_Ruby_ErrorType(code)               
+#define SWIG_ErrorType(code)                            SWIG_Ruby_ErrorType(code)
 #define SWIG_Error(code, msg)            		rb_raise(SWIG_Ruby_ErrorType(code), "%s", msg)
-#define SWIG_fail                        		goto fail				 
+#define SWIG_fail                        		goto fail
 
 
 /* Ruby-specific SWIG API */
 
-#define SWIG_InitRuntime()                              SWIG_Ruby_InitRuntime()              
+#define SWIG_InitRuntime()                              SWIG_Ruby_InitRuntime()
 #define SWIG_define_class(ty)                        	SWIG_Ruby_define_class(ty)
 #define SWIG_NewClassInstance(value, ty)             	SWIG_Ruby_NewClassInstance(value, ty)
-#define SWIG_MangleStr(value)                        	SWIG_Ruby_MangleStr(value)		  
-#define SWIG_CheckConvert(value, ty)                 	SWIG_Ruby_CheckConvert(value, ty)	  
+#define SWIG_MangleStr(value)                        	SWIG_Ruby_MangleStr(value)
+#define SWIG_CheckConvert(value, ty)                 	SWIG_Ruby_CheckConvert(value, ty)
 
 #include "assert.h"
 
@@ -1461,9 +1461,9 @@ static ID swig_call_id  = 0;
 
 /*
   If your swig extension is to be run within an embedded ruby and has
-  director callbacks, you should set -DRUBY_EMBEDDED during compilation.  
-  This will reset ruby's stack frame on each entry point from the main 
-  program the first time a virtual director function is invoked (in a 
+  director callbacks, you should set -DRUBY_EMBEDDED during compilation.
+  This will reset ruby's stack frame on each entry point from the main
+  program the first time a virtual director function is invoked (in a
   non-recursive way).
   If this is not done, you run the risk of Ruby trashing the stack.
 */
@@ -1489,7 +1489,7 @@ static ID swig_call_id  = 0;
 #endif  /* RUBY_EMBEDDED */
 
 
-SWIGRUNTIME VALUE 
+SWIGRUNTIME VALUE
 getExceptionClass(void) {
   static int init = 0;
   static VALUE rubyExceptionClass ;
@@ -1498,7 +1498,7 @@ getExceptionClass(void) {
     rubyExceptionClass = rb_const_get(_mSWIG, rb_intern("Exception"));
   }
   return rubyExceptionClass;
-} 
+}
 
 /* This code checks to see if the Ruby object being raised as part
    of an exception inherits from the Ruby class Exception.  If so,
@@ -1543,31 +1543,31 @@ SWIG_Ruby_define_class(swig_type_info *type)
 SWIGRUNTIME VALUE
 SWIG_Ruby_NewPointerObj(void *ptr, swig_type_info *type, int flags)
 {
-  int own =  flags & SWIG_POINTER_OWN; 
+  int own =  flags & SWIG_POINTER_OWN;
   int track;
   char *klass_name;
   swig_class *sklass;
   VALUE klass;
   VALUE obj;
-  
+
   if (!ptr)
     return Qnil;
-  
+
   if (type->clientdata) {
     sklass = (swig_class *) type->clientdata;
-		
+
     /* Are we tracking this class and have we already returned this Ruby object? */
     track = sklass->trackObjects;
     if (track) {
       obj = SWIG_RubyInstanceFor(ptr);
-      
+
       /* Check the object's type and make sure it has the correct type.
-        It might not in cases where methods do things like 
+        It might not in cases where methods do things like
         downcast methods. */
       if (obj != Qnil) {
         VALUE value = rb_iv_get(obj, "@__swigtype__");
         const char* type_name = RSTRING_PTR(value);
-				
+
         if (strcmp(type->name, type_name) == 0) {
           return obj;
         }
@@ -1575,8 +1575,8 @@ SWIG_Ruby_NewPointerObj(void *ptr, swig_type_info *type, int flags)
     }
 
     /* Create a new Ruby object */
-    obj = Data_Wrap_Struct(sklass->klass, VOIDFUNC(sklass->mark), 
-			   ( own ? VOIDFUNC(sklass->destroy) : 
+    obj = Data_Wrap_Struct(sklass->klass, VOIDFUNC(sklass->mark),
+			   ( own ? VOIDFUNC(sklass->destroy) :
 			     (track ? VOIDFUNC(SWIG_RubyRemoveTracking) : 0 )
 			     ), ptr);
 
@@ -1592,7 +1592,7 @@ SWIG_Ruby_NewPointerObj(void *ptr, swig_type_info *type, int flags)
     obj = Data_Wrap_Struct(klass, 0, 0, ptr);
   }
   rb_iv_set(obj, "@__swigtype__", rb_str_new2(type->name));
-  
+
   return obj;
 }
 
@@ -1647,13 +1647,13 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
     }
     Data_Get_Struct(obj, void, vptr);
   }
-  
+
   if (own) *own = RDATA(obj)->dfree;
-    
+
   /* Check to see if the input object is giving up ownership
      of the underlying C struct or C++ object.  If so then we
-     need to reset the destructor since the Ruby object no 
-     longer owns the underlying C++ object.*/ 
+     need to reset the destructor since the Ruby object no
+     longer owns the underlying C++ object.*/
   if (flags & SWIG_POINTER_DISOWN) {
     /* Is tracking on for this class? */
     int track = 0;
@@ -1661,16 +1661,16 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
       swig_class *sklass = (swig_class *) ty->clientdata;
       track = sklass->trackObjects;
     }
-		
+
     if (track) {
       /* We are tracking objects for this class.  Thus we change the destructor
        * to SWIG_RubyRemoveTracking.  This allows us to
        * remove the mapping from the C++ to Ruby object
        * when the Ruby object is garbage collected.  If we don't
-       * do this, then it is possible we will return a reference 
+       * do this, then it is possible we will return a reference
        * to a Ruby object that no longer exists thereby crashing Ruby. */
       RDATA(obj)->dfree = SWIG_RubyRemoveTracking;
-    } else {    
+    } else {
       RDATA(obj)->dfree = 0;
     }
   }
@@ -1701,7 +1701,7 @@ SWIG_Ruby_ConvertPtrAndOwn(VALUE obj, void **ptr, swig_type_info *ty, int flags,
   } else {
     *ptr = vptr;
   }
-  
+
   return SWIG_OK;
 }
 
@@ -1756,7 +1756,7 @@ SWIG_Ruby_GetModule(void *SWIGUNUSEDPARM(clientdata))
 
  /* temporarily disable warnings, since the pointer check causes warnings with 'ruby -w' */
   rb_gv_set("VERBOSE", Qfalse);
-  
+
   /* first check if pointer already created */
   pointer = rb_gv_get("$swig_runtime_data_type_pointer" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME);
   if (pointer != Qnil) {
@@ -1768,11 +1768,12 @@ SWIG_Ruby_GetModule(void *SWIGUNUSEDPARM(clientdata))
   return ret;
 }
 
-SWIGRUNTIME void 
+SWIGRUNTIME void
 SWIG_Ruby_SetModule(swig_module_info *pointer)
 {
   /* register a new class */
   VALUE cl = rb_define_class("swig_runtime_data", rb_cObject);
+  rb_undef_alloc_func(cl);
   /* create and store the structure pointer to a global variable */
   swig_runtime_data_type_pointer = Data_Wrap_Struct(cl, 0, 0, pointer);
   rb_define_readonly_variable("$swig_runtime_data_type_pointer" SWIG_RUNTIME_VERSION SWIG_TYPE_TABLE_NAME, &swig_runtime_data_type_pointer);
@@ -1819,9 +1820,9 @@ int SWIG_Ruby_arity( VALUE proc, int minimal )
 
 
 
-#define SWIG_exception_fail(code, msg) do { SWIG_Error(code, msg); SWIG_fail; } while(0) 
+#define SWIG_exception_fail(code, msg) do { SWIG_Error(code, msg); SWIG_fail; } while(0)
 
-#define SWIG_contract_assert(expr, msg) if (!(expr)) { SWIG_Error(SWIG_RuntimeError, msg); SWIG_fail; } else 
+#define SWIG_contract_assert(expr, msg) if (!(expr)) { SWIG_Error(SWIG_RuntimeError, msg); SWIG_fail; } else
 
 
 
@@ -1865,12 +1866,12 @@ static VALUE mBridgesupportparser;
 #define SWIG_RUBY_THREAD_END_BLOCK
 
 
-#define SWIGVERSION 0x030006 
+#define SWIGVERSION 0x030006
 #define SWIG_VERSION SWIGVERSION
 
 
-#define SWIG_as_voidptr(a) const_cast< void * >(static_cast< const void * >(a)) 
-#define SWIG_as_voidptrptr(a) ((void)SWIG_as_voidptr(*a),reinterpret_cast< void** >(a)) 
+#define SWIG_as_voidptr(a) const_cast< void * >(static_cast< const void * >(a))
+#define SWIG_as_voidptrptr(a) ((void)SWIG_as_voidptr(*a),reinterpret_cast< void** >(a))
 
 
 #include <stdexcept>
@@ -1914,7 +1915,7 @@ SWIGINTERN int
 SWIG_AsCharPtrAndSize(VALUE obj, char** cptr, size_t* psize, int *alloc)
 {
   if (TYPE(obj) == T_STRING) {
-    char *cstr = StringValuePtr(obj); 
+    char *cstr = StringValuePtr(obj);
     size_t size = RSTRING_LEN(obj) + 1;
     if (cptr)  {
       if (alloc) {
@@ -1939,7 +1940,7 @@ SWIG_AsCharPtrAndSize(VALUE obj, char** cptr, size_t* psize, int *alloc)
 	return SWIG_OK;
       }
     }
-  }  
+  }
   return SWIG_TypeError;
 }
 
@@ -1948,7 +1949,7 @@ SWIG_AsCharPtrAndSize(VALUE obj, char** cptr, size_t* psize, int *alloc)
 
 
 SWIGINTERN int
-SWIG_AsPtr_std_string (VALUE obj, std::string **val) 
+SWIG_AsPtr_std_string (VALUE obj, std::string **val)
 {
   char* buf = 0 ; size_t size = 0; int alloc = SWIG_OLDOBJ;
   if (SWIG_IsOK((SWIG_AsCharPtrAndSize(obj, &buf, &size, &alloc)))) {
@@ -1992,7 +1993,7 @@ SWIGINTERN VALUE
 SWIG_ruby_failed(void)
 {
   return Qnil;
-} 
+}
 
 
 /*@SWIG:/usr/local/share/swig/3.0.6/ruby/rubyprimtypes.swg,19,%ruby_aux_method@*/
@@ -2035,7 +2036,7 @@ SWIG_AsVal_int (VALUE obj, int *val)
     } else {
       if (val) *val = static_cast< int >(v);
     }
-  }  
+  }
   return res;
 }
 
@@ -2051,11 +2052,11 @@ SWIG_AsVal_bool (VALUE obj, bool *val)
     return SWIG_OK;
   } else {
     int res = 0;
-    if (SWIG_AsVal_int (obj, &res) == SWIG_OK) {    
+    if (SWIG_AsVal_int (obj, &res) == SWIG_OK) {
       if (val) *val = res ? true : false;
       return SWIG_OK;
     }
-  }  
+  }
   return SWIG_TypeError;
 }
 
@@ -2078,7 +2079,7 @@ _wrap_BridgeSupportParser_parse__SWIG_0(int argc, VALUE *argv, VALUE self) {
   int res7 = SWIG_OLDOBJ ;
   bool val8 ;
   int ecode8 = 0 ;
-  
+
   if ((argc < 8) || (argc > 8)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 8)",argc); SWIG_fail;
   }
@@ -2092,10 +2093,10 @@ _wrap_BridgeSupportParser_parse__SWIG_0(int argc, VALUE *argv, VALUE self) {
     std::string *ptr = (std::string *)0;
     res3 = SWIG_AsPtr_std_string(argv[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] )); 
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] ));
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2])); 
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2]));
     }
     arg3 = ptr;
   }
@@ -2106,17 +2107,17 @@ _wrap_BridgeSupportParser_parse__SWIG_0(int argc, VALUE *argv, VALUE self) {
     std::string *ptr = (std::string *)0;
     res7 = SWIG_AsPtr_std_string(argv[6], &ptr);
     if (!SWIG_IsOK(res7)) {
-      SWIG_exception_fail(SWIG_ArgError(res7), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 7, argv[6] )); 
+      SWIG_exception_fail(SWIG_ArgError(res7), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 7, argv[6] ));
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 7, argv[6])); 
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 7, argv[6]));
     }
     arg7 = ptr;
   }
   ecode8 = SWIG_AsVal_bool(argv[7], &val8);
   if (!SWIG_IsOK(ecode8)) {
     SWIG_exception_fail(SWIG_ArgError(ecode8), Ruby_Format_TypeError( "", "bool","BridgeSupportParser::parse", 8, argv[7] ));
-  } 
+  }
   arg8 = static_cast< bool >(val8);
   BridgeSupportParser::parse(arg1,(char const *)arg2,(std::string const &)*arg3,arg4,arg5,arg6,(std::string const &)*arg7,arg8);
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -2145,7 +2146,7 @@ _wrap_BridgeSupportParser_parse__SWIG_1(int argc, VALUE *argv, VALUE self) {
   int alloc2 = 0 ;
   int res3 = SWIG_OLDOBJ ;
   int res7 = SWIG_OLDOBJ ;
-  
+
   if ((argc < 7) || (argc > 7)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 7)",argc); SWIG_fail;
   }
@@ -2159,10 +2160,10 @@ _wrap_BridgeSupportParser_parse__SWIG_1(int argc, VALUE *argv, VALUE self) {
     std::string *ptr = (std::string *)0;
     res3 = SWIG_AsPtr_std_string(argv[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] )); 
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] ));
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2])); 
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2]));
     }
     arg3 = ptr;
   }
@@ -2173,10 +2174,10 @@ _wrap_BridgeSupportParser_parse__SWIG_1(int argc, VALUE *argv, VALUE self) {
     std::string *ptr = (std::string *)0;
     res7 = SWIG_AsPtr_std_string(argv[6], &ptr);
     if (!SWIG_IsOK(res7)) {
-      SWIG_exception_fail(SWIG_ArgError(res7), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 7, argv[6] )); 
+      SWIG_exception_fail(SWIG_ArgError(res7), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 7, argv[6] ));
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 7, argv[6])); 
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 7, argv[6]));
     }
     arg7 = ptr;
   }
@@ -2205,7 +2206,7 @@ _wrap_BridgeSupportParser_parse__SWIG_2(int argc, VALUE *argv, VALUE self) {
   char *buf2 = 0 ;
   int alloc2 = 0 ;
   int res3 = SWIG_OLDOBJ ;
-  
+
   if ((argc < 6) || (argc > 6)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 6)",argc); SWIG_fail;
   }
@@ -2219,10 +2220,10 @@ _wrap_BridgeSupportParser_parse__SWIG_2(int argc, VALUE *argv, VALUE self) {
     std::string *ptr = (std::string *)0;
     res3 = SWIG_AsPtr_std_string(argv[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] )); 
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] ));
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2])); 
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2]));
     }
     arg3 = ptr;
   }
@@ -2251,7 +2252,7 @@ _wrap_BridgeSupportParser_parse__SWIG_3(int argc, VALUE *argv, VALUE self) {
   char *buf2 = 0 ;
   int alloc2 = 0 ;
   int res3 = SWIG_OLDOBJ ;
-  
+
   if ((argc < 5) || (argc > 5)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 5)",argc); SWIG_fail;
   }
@@ -2265,10 +2266,10 @@ _wrap_BridgeSupportParser_parse__SWIG_3(int argc, VALUE *argv, VALUE self) {
     std::string *ptr = (std::string *)0;
     res3 = SWIG_AsPtr_std_string(argv[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] )); 
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] ));
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2])); 
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2]));
     }
     arg3 = ptr;
   }
@@ -2295,7 +2296,7 @@ _wrap_BridgeSupportParser_parse__SWIG_4(int argc, VALUE *argv, VALUE self) {
   char *buf2 = 0 ;
   int alloc2 = 0 ;
   int res3 = SWIG_OLDOBJ ;
-  
+
   if ((argc < 4) || (argc > 4)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 4)",argc); SWIG_fail;
   }
@@ -2309,10 +2310,10 @@ _wrap_BridgeSupportParser_parse__SWIG_4(int argc, VALUE *argv, VALUE self) {
     std::string *ptr = (std::string *)0;
     res3 = SWIG_AsPtr_std_string(argv[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] )); 
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] ));
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2])); 
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2]));
     }
     arg3 = ptr;
   }
@@ -2337,7 +2338,7 @@ _wrap_BridgeSupportParser_parse__SWIG_5(int argc, VALUE *argv, VALUE self) {
   char *buf2 = 0 ;
   int alloc2 = 0 ;
   int res3 = SWIG_OLDOBJ ;
-  
+
   if ((argc < 3) || (argc > 3)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 3)",argc); SWIG_fail;
   }
@@ -2351,10 +2352,10 @@ _wrap_BridgeSupportParser_parse__SWIG_5(int argc, VALUE *argv, VALUE self) {
     std::string *ptr = (std::string *)0;
     res3 = SWIG_AsPtr_std_string(argv[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] )); 
+      SWIG_exception_fail(SWIG_ArgError(res3), Ruby_Format_TypeError( "", "std::string const &","BridgeSupportParser::parse", 3, argv[2] ));
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2])); 
+      SWIG_exception_fail(SWIG_ValueError, Ruby_Format_TypeError("invalid null reference ", "std::string const &","BridgeSupportParser::parse", 3, argv[2]));
     }
     arg3 = ptr;
   }
@@ -2373,7 +2374,7 @@ SWIGINTERN VALUE _wrap_BridgeSupportParser_parse(int nargs, VALUE *args, VALUE s
   int argc;
   VALUE argv[8];
   int ii;
-  
+
   argc = nargs;
   if (argc > 8) SWIG_fail;
   for (ii = 0; (ii < argc); ++ii) {
@@ -2519,16 +2520,16 @@ SWIGINTERN VALUE _wrap_BridgeSupportParser_parse(int nargs, VALUE *args, VALUE s
       }
     }
   }
-  
+
 fail:
-  Ruby_Format_OverloadedError( argc, 8, "BridgeSupportParser.parse", 
+  Ruby_Format_OverloadedError( argc, 8, "BridgeSupportParser.parse",
     "    void BridgeSupportParser.parse(VALUE headers, char const *content, std::string const &triple, VALUE defines, VALUE incdirs, VALUE rubydefaultincs, std::string const &sysroot, bool verbose)\n"
     "    void BridgeSupportParser.parse(VALUE headers, char const *content, std::string const &triple, VALUE defines, VALUE incdirs, VALUE rubydefaultincs, std::string const &sysroot)\n"
     "    void BridgeSupportParser.parse(VALUE headers, char const *content, std::string const &triple, VALUE defines, VALUE incdirs, VALUE rubydefaultincs)\n"
     "    void BridgeSupportParser.parse(VALUE headers, char const *content, std::string const &triple, VALUE defines, VALUE incdirs)\n"
     "    void BridgeSupportParser.parse(VALUE headers, char const *content, std::string const &triple, VALUE defines)\n"
     "    void BridgeSupportParser.parse(VALUE headers, char const *content, std::string const &triple)\n");
-  
+
   return Qnil;
 }
 
@@ -2542,13 +2543,13 @@ _wrap_ABase_path(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_ABase, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "ABase *","path", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "ABase *","path", 1, self ));
   }
   arg1 = reinterpret_cast< ABase * >(argp1);
   result = (VALUE)(arg1)->path();
@@ -2577,13 +2578,13 @@ _wrap_AnEnum_each_value(int argc, VALUE *argv, VALUE self) {
   AnEnum *arg1 = (AnEnum *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnEnum, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnEnum *","each_value", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnEnum *","each_value", 1, self ));
   }
   arg1 = reinterpret_cast< AnEnum * >(argp1);
   (arg1)->each_value();
@@ -2600,13 +2601,13 @@ _wrap_AnEnum_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnEnum, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnEnum *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnEnum *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AnEnum * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2626,13 +2627,13 @@ _wrap_AFunctionDecl_each_argument(int argc, VALUE *argv, VALUE self) {
   AFunctionDecl *arg1 = (AFunctionDecl *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AFunctionDecl, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionDecl *","each_argument", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionDecl *","each_argument", 1, self ));
   }
   arg1 = reinterpret_cast< AFunctionDecl * >(argp1);
   (arg1)->each_argument();
@@ -2649,13 +2650,13 @@ _wrap_AFunctionDecl_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AFunctionDecl, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionDecl *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionDecl *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AFunctionDecl * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2673,13 +2674,13 @@ _wrap_AFunctionType_each_argument(int argc, VALUE *argv, VALUE self) {
   AFunctionType *arg1 = (AFunctionType *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AFunctionType, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionType *","each_argument", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionType *","each_argument", 1, self ));
   }
   arg1 = reinterpret_cast< AFunctionType * >(argp1);
   (arg1)->each_argument();
@@ -2696,13 +2697,13 @@ _wrap_AFunctionType_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AFunctionType, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionType *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionType *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AFunctionType * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2718,13 +2719,13 @@ _wrap_delete_AFunctionType(int argc, VALUE *argv, VALUE self) {
   AFunctionType *arg1 = (AFunctionType *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 1) || (argc > 1)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 1)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(argv[0], &argp1,SWIGTYPE_p_AFunctionType, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionType *","delete_AFunctionType", 1, argv[0] )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AFunctionType *","delete_AFunctionType", 1, argv[0] ));
   }
   arg1 = reinterpret_cast< AFunctionType * >(argp1);
   delete_AFunctionType(arg1);
@@ -2745,13 +2746,13 @@ _wrap_AMacroValueBase_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AMacroValueBase, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AMacroValueBase *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AMacroValueBase *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AMacroValueBase * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2775,13 +2776,13 @@ _wrap_AMacroNumberFuncCall_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AMacroNumberFuncCall, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AMacroNumberFuncCall *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AMacroNumberFuncCall *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AMacroNumberFuncCall * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2801,13 +2802,13 @@ _wrap_AMacroString_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AMacroString, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AMacroString *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AMacroString *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AMacroString * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2825,13 +2826,13 @@ _wrap_AnObjCMethodProtocolIter_each_method(int argc, VALUE *argv, VALUE self) {
   AnObjCMethodProtocolIter *arg1 = (AnObjCMethodProtocolIter *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnObjCMethodProtocolIter, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCMethodProtocolIter *","each_method", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCMethodProtocolIter *","each_method", 1, self ));
   }
   arg1 = reinterpret_cast< AnObjCMethodProtocolIter * >(argp1);
   (arg1)->each_method();
@@ -2846,13 +2847,13 @@ _wrap_AnObjCMethodProtocolIter_each_protocol(int argc, VALUE *argv, VALUE self) 
   AnObjCMethodProtocolIter *arg1 = (AnObjCMethodProtocolIter *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnObjCMethodProtocolIter, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCMethodProtocolIter *","each_protocol", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCMethodProtocolIter *","each_protocol", 1, self ));
   }
   arg1 = reinterpret_cast< AnObjCMethodProtocolIter * >(argp1);
   (arg1)->each_protocol();
@@ -2871,13 +2872,13 @@ _wrap_AnObjCCategory_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnObjCCategory, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCCategory *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCCategory *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AnObjCCategory * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2897,13 +2898,13 @@ _wrap_AnObjCInterface_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnObjCInterface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCInterface *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCInterface *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AnObjCInterface * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2921,13 +2922,13 @@ _wrap_AnObjCMethod_each_argument(int argc, VALUE *argv, VALUE self) {
   AnObjCMethod *arg1 = (AnObjCMethod *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnObjCMethod, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCMethod *","each_argument", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCMethod *","each_argument", 1, self ));
   }
   arg1 = reinterpret_cast< AnObjCMethod * >(argp1);
   (arg1)->each_argument();
@@ -2944,13 +2945,13 @@ _wrap_AnObjCMethod_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnObjCMethod, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCMethod *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCMethod *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AnObjCMethod * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2970,13 +2971,13 @@ _wrap_AnObjCProtocol_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AnObjCProtocol, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCProtocol *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AnObjCProtocol *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AnObjCProtocol * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -2994,13 +2995,13 @@ _wrap_AStruct_each_field(int argc, VALUE *argv, VALUE self) {
   AStruct *arg1 = (AStruct *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AStruct, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AStruct *","each_field", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AStruct *","each_field", 1, self ));
   }
   arg1 = reinterpret_cast< AStruct * >(argp1);
   (arg1)->each_field();
@@ -3017,13 +3018,13 @@ _wrap_AStruct_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AStruct, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AStruct *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AStruct *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AStruct * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -3043,13 +3044,13 @@ _wrap_ATypedef_encoding(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_ATypedef, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "ATypedef *","encoding", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "ATypedef *","encoding", 1, self ));
   }
   arg1 = reinterpret_cast< ATypedef * >(argp1);
   result = (VALUE)(arg1)->encoding();
@@ -3067,13 +3068,13 @@ _wrap_ATypedef_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_ATypedef, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "ATypedef *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "ATypedef *","info", 1, self ));
   }
   arg1 = reinterpret_cast< ATypedef * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -3089,13 +3090,13 @@ _wrap_ATypedef_walk_types(int argc, VALUE *argv, VALUE self) {
   ATypedef *arg1 = (ATypedef *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_ATypedef, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "ATypedef *","walk_types", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "ATypedef *","walk_types", 1, self ));
   }
   arg1 = reinterpret_cast< ATypedef * >(argp1);
   (arg1)->walk_types();
@@ -3114,13 +3115,13 @@ _wrap_AVar_info(int argc, VALUE *argv, VALUE self) {
   int res1 = 0 ;
   VALUE result;
   VALUE vresult = Qnil;
-  
+
   if ((argc < 0) || (argc > 0)) {
     rb_raise(rb_eArgError, "wrong # of arguments(%d for 0)",argc); SWIG_fail;
   }
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_AVar, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AVar *","info", 1, self )); 
+    SWIG_exception_fail(SWIG_ArgError(res1), Ruby_Format_TypeError( "", "AVar *","info", 1, self ));
   }
   arg1 = reinterpret_cast< AVar * >(argp1);
   result = (VALUE)(arg1)->info();
@@ -3604,37 +3605,37 @@ extern "C"
 #endif
 SWIGEXPORT void Init_bridgesupportparser(void) {
   size_t i;
-  
+
   SWIG_InitRuntime();
   mBridgesupportparser = rb_define_module("Bridgesupportparser");
-  
+
   SWIG_InitializeModule(0);
   for (i = 0; i < swig_module.size; i++) {
     SWIG_define_class(swig_module.types[i]);
   }
-  
+
   SWIG_RubyInitializeTrackings();
-  
+
   SwigClassBridgeSupportParser.klass = rb_define_class_under(mBridgesupportparser, "BridgeSupportParser", rb_cObject);
   SWIG_TypeClientData(SWIGTYPE_p_BridgeSupportParser, (void *) &SwigClassBridgeSupportParser);
   rb_undef_alloc_func(SwigClassBridgeSupportParser.klass);
   rb_define_singleton_method(SwigClassBridgeSupportParser.klass, "parse", VALUEFUNC(_wrap_BridgeSupportParser_parse), -1);
   SwigClassBridgeSupportParser.mark = 0;
   SwigClassBridgeSupportParser.trackObjects = 0;
-  
+
   SwigClassABase.klass = rb_define_class_under(mBridgesupportparser, "ABase", rb_cObject);
   SWIG_TypeClientData(SWIGTYPE_p_ABase, (void *) &SwigClassABase);
   rb_undef_alloc_func(SwigClassABase.klass);
   rb_define_method(SwigClassABase.klass, "path", VALUEFUNC(_wrap_ABase_path), -1);
   SwigClassABase.mark = 0;
   SwigClassABase.trackObjects = 0;
-  
+
   SwigClassTopLevel.klass = rb_define_class_under(mBridgesupportparser, "TopLevel", ((swig_class *) SWIGTYPE_p_ABase->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_TopLevel, (void *) &SwigClassTopLevel);
   rb_undef_alloc_func(SwigClassTopLevel.klass);
   SwigClassTopLevel.mark = 0;
   SwigClassTopLevel.trackObjects = 0;
-  
+
   SwigClassAnEnum.klass = rb_define_class_under(mBridgesupportparser, "AnEnum", ((swig_class *) SWIGTYPE_p_TopLevel->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AnEnum, (void *) &SwigClassAnEnum);
   rb_undef_alloc_func(SwigClassAnEnum.klass);
@@ -3642,13 +3643,13 @@ SWIGEXPORT void Init_bridgesupportparser(void) {
   rb_define_method(SwigClassAnEnum.klass, "info", VALUEFUNC(_wrap_AnEnum_info), -1);
   SwigClassAnEnum.mark = 0;
   SwigClassAnEnum.trackObjects = 0;
-  
+
   SwigClassAFunction.klass = rb_define_class_under(mBridgesupportparser, "AFunction", ((swig_class *) SWIGTYPE_p_TopLevel->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AFunction, (void *) &SwigClassAFunction);
   rb_undef_alloc_func(SwigClassAFunction.klass);
   SwigClassAFunction.mark = 0;
   SwigClassAFunction.trackObjects = 0;
-  
+
   SwigClassAFunctionDecl.klass = rb_define_class_under(mBridgesupportparser, "AFunctionDecl", ((swig_class *) SWIGTYPE_p_AFunction->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AFunctionDecl, (void *) &SwigClassAFunctionDecl);
   rb_undef_alloc_func(SwigClassAFunctionDecl.klass);
@@ -3657,7 +3658,7 @@ SWIGEXPORT void Init_bridgesupportparser(void) {
   SwigClassAFunctionDecl.mark = 0;
   SwigClassAFunctionDecl.trackObjects = 0;
   rb_define_module_function(mBridgesupportparser, "delete_AFunctionType", VALUEFUNC(_wrap_delete_AFunctionType), -1);
-  
+
   SwigClassAFunctionType.klass = rb_define_class_under(mBridgesupportparser, "AFunctionType", ((swig_class *) SWIGTYPE_p_AFunction->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AFunctionType, (void *) &SwigClassAFunctionType);
   rb_undef_alloc_func(SwigClassAFunctionType.klass);
@@ -3665,46 +3666,46 @@ SWIGEXPORT void Init_bridgesupportparser(void) {
   rb_define_method(SwigClassAFunctionType.klass, "info", VALUEFUNC(_wrap_AFunctionType_info), -1);
   SwigClassAFunctionType.mark = 0;
   SwigClassAFunctionType.trackObjects = 0;
-  
+
   SwigClassAMacroBase.klass = rb_define_class_under(mBridgesupportparser, "AMacroBase", ((swig_class *) SWIGTYPE_p_ABase->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AMacroBase, (void *) &SwigClassAMacroBase);
   rb_undef_alloc_func(SwigClassAMacroBase.klass);
   SwigClassAMacroBase.mark = 0;
   SwigClassAMacroBase.trackObjects = 0;
-  
+
   SwigClassAMacroValueBase.klass = rb_define_class_under(mBridgesupportparser, "AMacroValueBase", ((swig_class *) SWIGTYPE_p_AMacroBase->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AMacroValueBase, (void *) &SwigClassAMacroValueBase);
   rb_undef_alloc_func(SwigClassAMacroValueBase.klass);
   rb_define_method(SwigClassAMacroValueBase.klass, "info", VALUEFUNC(_wrap_AMacroValueBase_info), -1);
   SwigClassAMacroValueBase.mark = 0;
   SwigClassAMacroValueBase.trackObjects = 0;
-  
+
   SwigClassAMacroFunctionAlias.klass = rb_define_class_under(mBridgesupportparser, "AMacroFunctionAlias", ((swig_class *) SWIGTYPE_p_AMacroValueBase->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AMacroFunctionAlias, (void *) &SwigClassAMacroFunctionAlias);
   rb_undef_alloc_func(SwigClassAMacroFunctionAlias.klass);
   SwigClassAMacroFunctionAlias.mark = 0;
   SwigClassAMacroFunctionAlias.trackObjects = 0;
-  
+
   SwigClassAMacroNumber.klass = rb_define_class_under(mBridgesupportparser, "AMacroNumber", ((swig_class *) SWIGTYPE_p_AMacroValueBase->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AMacroNumber, (void *) &SwigClassAMacroNumber);
   rb_undef_alloc_func(SwigClassAMacroNumber.klass);
   SwigClassAMacroNumber.mark = 0;
   SwigClassAMacroNumber.trackObjects = 0;
-  
+
   SwigClassAMacroNumberFuncCall.klass = rb_define_class_under(mBridgesupportparser, "AMacroNumberFuncCall", ((swig_class *) SWIGTYPE_p_AMacroBase->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AMacroNumberFuncCall, (void *) &SwigClassAMacroNumberFuncCall);
   rb_undef_alloc_func(SwigClassAMacroNumberFuncCall.klass);
   rb_define_method(SwigClassAMacroNumberFuncCall.klass, "info", VALUEFUNC(_wrap_AMacroNumberFuncCall_info), -1);
   SwigClassAMacroNumberFuncCall.mark = 0;
   SwigClassAMacroNumberFuncCall.trackObjects = 0;
-  
+
   SwigClassAMacroString.klass = rb_define_class_under(mBridgesupportparser, "AMacroString", ((swig_class *) SWIGTYPE_p_AMacroValueBase->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AMacroString, (void *) &SwigClassAMacroString);
   rb_undef_alloc_func(SwigClassAMacroString.klass);
   rb_define_method(SwigClassAMacroString.klass, "info", VALUEFUNC(_wrap_AMacroString_info), -1);
   SwigClassAMacroString.mark = 0;
   SwigClassAMacroString.trackObjects = 0;
-  
+
   SwigClassAnObjCMethodProtocolIter.klass = rb_define_class_under(mBridgesupportparser, "AnObjCMethodProtocolIter", ((swig_class *) SWIGTYPE_p_TopLevel->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AnObjCMethodProtocolIter, (void *) &SwigClassAnObjCMethodProtocolIter);
   rb_undef_alloc_func(SwigClassAnObjCMethodProtocolIter.klass);
@@ -3712,21 +3713,21 @@ SWIGEXPORT void Init_bridgesupportparser(void) {
   rb_define_method(SwigClassAnObjCMethodProtocolIter.klass, "each_protocol", VALUEFUNC(_wrap_AnObjCMethodProtocolIter_each_protocol), -1);
   SwigClassAnObjCMethodProtocolIter.mark = 0;
   SwigClassAnObjCMethodProtocolIter.trackObjects = 0;
-  
+
   SwigClassAnObjCCategory.klass = rb_define_class_under(mBridgesupportparser, "AnObjCCategory", ((swig_class *) SWIGTYPE_p_AnObjCMethodProtocolIter->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AnObjCCategory, (void *) &SwigClassAnObjCCategory);
   rb_undef_alloc_func(SwigClassAnObjCCategory.klass);
   rb_define_method(SwigClassAnObjCCategory.klass, "info", VALUEFUNC(_wrap_AnObjCCategory_info), -1);
   SwigClassAnObjCCategory.mark = 0;
   SwigClassAnObjCCategory.trackObjects = 0;
-  
+
   SwigClassAnObjCInterface.klass = rb_define_class_under(mBridgesupportparser, "AnObjCInterface", ((swig_class *) SWIGTYPE_p_AnObjCMethodProtocolIter->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AnObjCInterface, (void *) &SwigClassAnObjCInterface);
   rb_undef_alloc_func(SwigClassAnObjCInterface.klass);
   rb_define_method(SwigClassAnObjCInterface.klass, "info", VALUEFUNC(_wrap_AnObjCInterface_info), -1);
   SwigClassAnObjCInterface.mark = 0;
   SwigClassAnObjCInterface.trackObjects = 0;
-  
+
   SwigClassAnObjCMethod.klass = rb_define_class_under(mBridgesupportparser, "AnObjCMethod", ((swig_class *) SWIGTYPE_p_TopLevel->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AnObjCMethod, (void *) &SwigClassAnObjCMethod);
   rb_undef_alloc_func(SwigClassAnObjCMethod.klass);
@@ -3734,14 +3735,14 @@ SWIGEXPORT void Init_bridgesupportparser(void) {
   rb_define_method(SwigClassAnObjCMethod.klass, "info", VALUEFUNC(_wrap_AnObjCMethod_info), -1);
   SwigClassAnObjCMethod.mark = 0;
   SwigClassAnObjCMethod.trackObjects = 0;
-  
+
   SwigClassAnObjCProtocol.klass = rb_define_class_under(mBridgesupportparser, "AnObjCProtocol", ((swig_class *) SWIGTYPE_p_AnObjCMethodProtocolIter->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AnObjCProtocol, (void *) &SwigClassAnObjCProtocol);
   rb_undef_alloc_func(SwigClassAnObjCProtocol.klass);
   rb_define_method(SwigClassAnObjCProtocol.klass, "info", VALUEFUNC(_wrap_AnObjCProtocol_info), -1);
   SwigClassAnObjCProtocol.mark = 0;
   SwigClassAnObjCProtocol.trackObjects = 0;
-  
+
   SwigClassAStruct.klass = rb_define_class_under(mBridgesupportparser, "AStruct", ((swig_class *) SWIGTYPE_p_TopLevel->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AStruct, (void *) &SwigClassAStruct);
   rb_undef_alloc_func(SwigClassAStruct.klass);
@@ -3749,7 +3750,7 @@ SWIGEXPORT void Init_bridgesupportparser(void) {
   rb_define_method(SwigClassAStruct.klass, "info", VALUEFUNC(_wrap_AStruct_info), -1);
   SwigClassAStruct.mark = 0;
   SwigClassAStruct.trackObjects = 0;
-  
+
   SwigClassATypedef.klass = rb_define_class_under(mBridgesupportparser, "ATypedef", ((swig_class *) SWIGTYPE_p_TopLevel->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_ATypedef, (void *) &SwigClassATypedef);
   rb_undef_alloc_func(SwigClassATypedef.klass);
@@ -3758,14 +3759,14 @@ SWIGEXPORT void Init_bridgesupportparser(void) {
   rb_define_method(SwigClassATypedef.klass, "walk_types", VALUEFUNC(_wrap_ATypedef_walk_types), -1);
   SwigClassATypedef.mark = 0;
   SwigClassATypedef.trackObjects = 0;
-  
+
   SwigClassAVar.klass = rb_define_class_under(mBridgesupportparser, "AVar", ((swig_class *) SWIGTYPE_p_TopLevel->clientdata)->klass);
   SWIG_TypeClientData(SWIGTYPE_p_AVar, (void *) &SwigClassAVar);
   rb_undef_alloc_func(SwigClassAVar.klass);
   rb_define_method(SwigClassAVar.klass, "info", VALUEFUNC(_wrap_AVar_info), -1);
   SwigClassAVar.mark = 0;
   SwigClassAVar.trackObjects = 0;
-  
+
   klass_AnEnum = SwigClassAnEnum.klass;
   klass_AFunctionDecl = SwigClassAFunctionDecl.klass;
   klass_AFunctionType = SwigClassAFunctionType.klass;
@@ -3780,6 +3781,6 @@ SWIGEXPORT void Init_bridgesupportparser(void) {
   klass_AStruct = SwigClassAStruct.klass;
   klass_ATypedef = SwigClassATypedef.klass;
   klass_AVar = SwigClassAVar.klass;
-  
+
 }
 

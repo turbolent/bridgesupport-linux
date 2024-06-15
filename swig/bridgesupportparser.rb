@@ -923,9 +923,7 @@ module Bridgesupportparser
 	    end
 	    @parsecontent = a.join("\n") + "\n"
 	    puts "parsecontent:\n#{@parsecontent}" if $DEBUG
-	    #@parsedefines = ['__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=1070']
-	    #@parsedefines.concat(defines) unless defines.nil?
-	    @parsedefines = defines;
+	    @parsedefines = defines
 	    @parseincdirs = incdirs
 	    @parsedefaultincs = defaultincs
 	    @parsesysroot = sysroot
@@ -955,7 +953,7 @@ module Bridgesupportparser
 		    pp = nil
 		    unless walk.any? do |i|
 			pp = File.join(i, p)
-			File.exists?(pp)
+			File.exist?(pp)
 		    end then
 			raise "Can't find \"#{p}\""
 		    end
@@ -979,7 +977,7 @@ module Bridgesupportparser
 		if @parse_select.include?(k)
 		    v.each do |p, a|
 			p = sysroot + p;
-			@specialpathcache[Pathname.new(p).realpath.to_s] = a if File.exists?(p)
+			@specialpathcache[Pathname.new(p).realpath.to_s] = a if File.exist?(p)
 		    end
 		end
 	    end

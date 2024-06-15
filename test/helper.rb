@@ -15,11 +15,12 @@ def generate_command header_list_file_name, bridgesupport_file_name, options
   end.join " "
 
 <<-S
+RUBYLIB='../DSTROOT/System/Library/BridgeSupport/ruby-3.2' \
 RUBYOPT='' \
-'../RubyMotion/bin/gen_bridge_metadata' \
+ruby ../gen_bridge_metadata.rb \
 --format complete  \
 #{options_to_add} \
---headers "#{header_list_file_name}" \
+"#{header_list_file_name}" \
 -o '#{bridgesupport_file_name}'
 S
 end
@@ -27,7 +28,7 @@ end
 def gen_bridge_metadata(header_file_name, options = {})
   default_options = {
     #debug: "", # uncomment this option for full debug trace
-    cflags: "-isysroot '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk' -miphoneos-version-min=10.0 -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=120200"
+    cflags: "-Ioutput"
   }
   header_file_include_location = " -I./header -I. -I'.' "
   options = default_options.merge options

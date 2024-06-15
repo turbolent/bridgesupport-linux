@@ -4,15 +4,15 @@ SHELL = /bin/sh
 
 #### Start of system configuration section. ####
 
-usrlib  = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/include
-topdir  = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/lib/ruby/2.6.0/universal-darwin22
-hdrdir  = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/include/ruby-2.6.0
-confdir = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/include/ruby-2.6.0/universal-darwin22
+usrlib  = /usr/include
+topdir  = /usr/lib/ruby/3.2.0
+hdrdir  = /usr/include/ruby-3.2.0
+confdir = /usr/include/x86_64-linux-gnu/ruby-3.2.0
 
 srcdir = .
 VPATH = $(srcdir):$(topdir):$(hdrdir)
 exec_prefix = $(prefix)
-prefix = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr
+prefix = /usr
 sharedstatedir = $(prefix)/com
 mandir = $(DESTDIR)/usr/share/man
 psdir = $(docdir)
@@ -25,11 +25,11 @@ htmldir = $(docdir)
 vendorarchdir = $(vendorlibdir)/$(sitearch)
 includedir = $(prefix)/include
 infodir = $(DESTDIR)/usr/share/info
-vendorlibdir = $(vendordir)/2.6.0
+vendorlibdir = $(vendordir)/3.2.0
 sysconfdir = $(prefix)/etc
 libdir = $(exec_prefix)/lib
 sbindir = $(exec_prefix)/sbin
-rubylibdir = $(libdir)/ruby/2.6.0
+rubylibdir = $(libdir)/ruby/3.2.0
 docdir = $(datarootdir)/doc/$(PACKAGE)
 dvidir = $(docdir)
 vendordir = $(libdir)/ruby/vendor_ruby
@@ -39,7 +39,7 @@ archdir = $(rubylibdir)/$(arch)
 sitearchdir = $(sitelibdir)/$(sitearch)
 datadir = $(datarootdir)
 localstatedir = $(prefix)/var
-sitelibdir = $(sitedir)/2.6.0
+sitelibdir = $(sitedir)/3.2.0
 
 CC = c++
 CXX = $(CC)
@@ -50,29 +50,28 @@ LIBRUBYARG_STATIC = -l$(RUBY_SO_NAME)
 
 RUBY_EXTCONF_H =
 LLVM-CONFIG = llvm-config
-CFLAGS   =  $(RC_CFLAGS) -arch x86_64 -arch arm64 -mmacosx-version-min=10.9 $(shell $(LLVM-CONFIG) --cxxflags | sed -e 's/ *-arch [^ ]*//g' -e 's/ *-D[^ ]*//g')
+CFLAGS   =  $(shell $(LLVM-CONFIG) --cxxflags)
 
 INCFLAGS = -I$(usrlib) -I. -I$(topdir) -I$(hdrdir) -I$(confdir) -I$(srcdir)
 DEFS     =
-CPPFLAGS =  $(shell $(LLVM-CONFIG) -arch x86_64 -arch arm64 --cppflags | sed 's/ *-arch [^ ]*//g')
+CPPFLAGS = $(shell $(LLVM-CONFIG) --cppflags)
+ldflags  = $(shell $(LLVM-CONFIG) --ldflags)
 
-CXXFLAGS = $(CFLAGS) -arch x86_64 -arch arm64 -Wno-switch -Wno-reserved-user-defined-literal
-ldflags  = $(RC_CFLAGS) -arch x86_64 -arch arm64 -mmacosx-version-min=10.9 $(shell $(LLVM-CONFIG) --ldflags | sed 's/ *-arch [^ ]*//g')
+CXXFLAGS = $(CFLAGS) -Wno-switch -Wno-reserved-user-defined-literal
 
-dldflags =
-archflag =
-DLDFLAGS = $(ldflags) $(dldflags) $(archflag)
-LDSHARED = $(CC) $(RC_CFLAGS) -pipe -bundle
+# LLVM_LIBDIR  = $(shell $(LLVM-CONFIG) --libdir)
+# CLANG_LIBS = clangCodeGen clangAnalysis clangRewriteFrontend clangSema clangSerialization clangFrontend clangEdit clangDriver clangAST clangParse clangLex clangBasic LLVMCore LLVMSupport LLVMBitWriter LLVMBitReader LLVMCodeGen LLVMAnalysis LLVMTarget LLVMMC LLVMMCParser LLVMOption LLVMProfileData
+# LLVM_LIBS = $(patsubst %, $(LLVM_LIBDIR)/lib%.a, $(CLANG_LIBS))
+
+LDSHARED = $(CC) -pipe -shared
 AR = ar
 EXEEXT =
 
-RUBY_INSTALL_NAME = ruby
-RUBY_SO_NAME = ruby
+RUBY_SO_NAME = ruby-3.2
 arch = $(shell $(RUBY) -e 'puts RUBY_PLATFORM')
 sitearch = $(arch)
 
-ruby = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/include/ruby-2.6.0/universal-darwin22/ruby
-RUBY = $(ruby)
+RUBY = ruby
 RM = rm -f
 MAKEDIRS = mkdir -p
 INSTALL = /usr/bin/install -c
@@ -95,11 +94,11 @@ extout =
 extout_prefix =
 target_prefix =
 LOCAL_LIBS =
-LIBS = $(LIBRUBYARG_SHARED) -lclangCodeGen -lclangAnalysis -lclangARCMigrate -lclangRewriteFrontend -lclangSema -lclangSerialization -lclangFrontend -lclangEdit -lclangDriver -lclangAST -lclangParse -lclangLex -lclangBasic -lLLVMCore -lLLVMSupport -lLLVMBitWriter -lLLVMBitReader -lLLVMCodeGen -lLLVMAnalysis -lLLVMTarget -lLLVMMC -lLLVMMCParser -lLLVMOption -lLLVMProfileData -lz -lcurses
+LIBS = $(LIBRUBYARG_SHARED) -lz -lcurses -Wl,--whole-archive -lclangCodeGen -lclangAnalysis -lclangRewriteFrontend -lclangSema -lclangSerialization -lclangFrontend -lclangEdit -lclangDriver -lclangAST -lclangParse -lclangLex -lclangBasic -lLLVMCore -lLLVMSupport -lLLVMBitWriter -lLLVMBitReader -lLLVMCodeGen -lLLVMAnalysis -lLLVMTarget -lLLVMMC -lLLVMMCParser -lLLVMOption -lLLVMProfileData -Wl,--no-whole-archive
 SRCS = bridgesupportparser.cpp bridgesupportparser_wrap.cpp
 OBJS = bridgesupportparser.o bridgesupportparser_wrap.o
 TARGET = bridgesupportparser
-DLLIB = $(TARGET).bundle
+DLLIB = $(TARGET).so
 EXTSTATIC =
 STATIC_LIB =
 
@@ -109,7 +108,7 @@ RUBYLIBDIR    = $(sitelibdir)$(target_prefix)
 RUBYARCHDIR   = $(sitearchdir)$(target_prefix)
 
 TARGET_SO     = $(DLLIB)
-CLEANLIBS     = $(TARGET).bundle $(TARGET).il? $(TARGET).tds $(TARGET).map
+CLEANLIBS     = $(TARGET).so $(TARGET).il? $(TARGET).tds $(TARGET).map
 CLEANOBJS     = *.o *.a *.s[ol] *.pdb *.exp *.bak
 
 all:		$(DLLIB)
@@ -159,7 +158,7 @@ site-install-rb: install-rb
 
 $(DLLIB): $(OBJS) Makefile
 	@-$(RM) $@
-	$(LDSHARED) -o $@ $(OBJS) $(LIBPATH) $(DLDFLAGS) $(LOCAL_LIBS) $(LIBS)
+	$(LDSHARED) -fpic -o $@ $(OBJS) $(LIBPATH) $(ldflags) $(LOCAL_LIBS) $(LIBS)
 ifneq ($(findstring -g,$(CXXFLAGS)),)
 	dsymutil $@
 endif

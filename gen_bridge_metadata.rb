@@ -46,15 +46,6 @@ if $slb == $_slb_
     end
 end
 
-def getcc(sdkroot = '/')
-    return $_cc if $_cc
-    if File.exists?('/usr/bin/xcrun')
-	out = `/usr/bin/xcrun -sdk #{sdkroot} -find cc`.chomp
-	return $_cc = out unless out.empty?
-    end
-    return $_cc = 'cc'
-end
-
 require 'rexml/document'
 require 'fileutils'
 require 'optparse'
@@ -67,7 +58,7 @@ require 'bridgesupportparser'
 class OCHeaderAnalyzer
     CPP = ['/usr/bin/cpp-4.2', '/usr/bin/cpp-4.0', '/usr/bin/cpp'].find { |x| File.exist?(x) }
     raise "Can't find cpp: have you installed Xcode and the command-line tools?" if CPP.nil?
-    CPPFLAGS = "-D__APPLE_CPP__ -D__BLOCKS__ -include /usr/include/AvailabilityMacros.h"
+    CPPFLAGS = ""
     CPPFLAGS << " -D__GNUC__" unless /^cpp-4/.match(File.basename(CPP))
 
     def self.data(data)
@@ -535,12 +526,6 @@ class OrderedAttributes < REXML::Formatters::Pretty
     end
 end
 
-PRODUCTVERSION = `sw_vers -productVersion`.strip.to_f
-TIGER_OR_BELOW = PRODUCTVERSION <= 10.4
-SNOWLEOPARD_OR_BELOW = PRODUCTVERSION <= 10.6
-IS_PPC = `arch`.strip == 'ppc'
-OBJC_GC_COMPACTION = SNOWLEOPARD_OR_BELOW ? '': '-Wl,-objc_gc_compaction'
-
 class BridgeSupportGenerator
     VERSION = '1.0'
 
@@ -590,7 +575,7 @@ class BridgeSupportGenerator
 #    end
 
     def add_header(path)
-	h = (Pathname.new(path).absolute? || File.exists?(path)) ? File.basename(path) : path
+	h = (Pathname.new(path).absolute? || File.exist?(path)) ? File.basename(path) : path
 	@headers << path
 	@imports << h
 	@import_directive ||= ''
@@ -617,21 +602,7 @@ class BridgeSupportGenerator
 	    parser.only_parse_class(Bridgesupportparser::AFunction)
 	end
 
-	target_triple = "#{arch}-apple-darwin#{args.darwinvers}"
-	if m = compiler_flags.match(/-m(.+)-version-min=([\d\.]+)/)
-	    platform = m[1]
-	    version = m[2]
-	    case platform
-	    when 'ios', 'ios-simulator', 'iphoneos'
-		target_triple = "#{arch}-apple-ios#{version}"
-	    when 'macosx'
-		target_triple = "#{arch}-apple-macosx#{version}"
-	    when 'tvos', 'tvos-simulator'
-		target_triple = "#{arch}-apple-tvos#{version}"
-	    when 'watchos', 'watchos-simulator'
-		target_triple = "#{arch}-apple-watchos#{version}"
-	    end
-	end
+	target_triple = "x86_64-linux-gnu"
 	$stderr.puts "### _parse(\"#{target_triple}\")" if $DEBUG
 	parser.parse(target_triple)
 	@sel_types = {}
@@ -725,13 +696,6 @@ class BridgeSupportGenerator
     end
     protected :_parse
 
-    def makedarwinvers(vers)
-	pieces = vers.split('.')[0..1]
-	pieces << '0' if pieces.length == 2
-	return sprintf('%d.%s', pieces[1].to_i + 4, pieces[2])
-    end
-    protected :makedarwinvers
-
     # parse cc flags, and return defines, include directories, include files
     # and the sysroot.  For clang, system directories get sysroot applied,'
     # but for gcc, -isystem directories don't get sysroot applied.  So we
@@ -739,7 +703,6 @@ class BridgeSupportGenerator
     # regular incdirs directories (so they are in the Angled group, but follow
     # all -I and -F directories.
     def parse_cc_args(args)
-	darwinvers = nil
 	defines = []
 	incdirs = []
 	incsys = []
@@ -757,26 +720,22 @@ class BridgeSupportGenerator
 	    when '-iquote' then incdirs << encode_includes(words.shift, 'Q', true, false)
 	    when '-isysroot' then sysroot = words.shift
 	    when '-include' then includes << words.shift
-	    when o.sub!(/^-mmacosx-version-min=/, '') then darwinvers = makedarwinvers(o)
 	    end
 	end
-	return darwinvers, defines, incdirs + incsys, includes, sysroot
+	return defines, incdirs + incsys, includes, sysroot
     end
     protected :parse_cc_args
 
     def parse(enable_32, enable_64, compiler_flags_64 = nil)
-	_darwinvers = makedarwinvers(ENV.has_key?('MACOSX_DEPLOYMENT_TARGET') ? ENV['MACOSX_DEPLOYMENT_TARGET'] : `sw_vers -productVersion`)
-	darwinvers = nil
 	defines = []
 	incdirs = []
 	includes = []
 	sysroot = ENV['SDKROOT'] || '/'
 	unless compiler_flags.nil?
-	    darwinvers, defines, incdirs, includes, sysroot = parse_cc_args(compiler_flags)
+	    defines, incdirs, includes, sysroot = parse_cc_args(compiler_flags)
 	end
-	getcc(sysroot) #initialize cached value
 	defaultincs = []
-	IO.popen("#{getcc()} -print-search-dirs") do |io|
+	IO.popen("cc -print-search-dirs") do |io|
 	    io.each do |line|
 		if m = line.chomp.match(/^libraries: =(.*)/)
 		    m[1].split(':').each do |path|
@@ -788,15 +747,10 @@ class BridgeSupportGenerator
 	end
 
 	prepare(sysroot == '/' ? '' : sysroot, enable_32, enable_64)
-	@incdirs << encode_includes("#{$slb}/include", 'A', false, true)
-	@incdirs << encode_includes('/System/Library/Frameworks/CoreServices.framework/Frameworks', 'S', false, true)
-	@imports.unshift('AvailabilityMacros.h')
-	@imports.unshift('_BS_bool.h')
 
 	args = OpenStruct.new
-	args.darwinvers = darwinvers.nil? ? _darwinvers : darwinvers
 	args.imports = includes + @imports
-	args.defines = defines + %w{__APPLE_CPP__=1} + %w{__BLOCKS__=1}
+	args.defines = defines
 	args.incdirs = incdirs + @incdirs
 	args.defaultincs = defaultincs
 	args.sysroot = sysroot
@@ -804,10 +758,9 @@ class BridgeSupportGenerator
 	@parser = _parse(args, ARCH) if @enable_32
 	if @enable_64
 	    unless compiler_flags_64.nil? || compiler_flags == compiler_flags_64
-		darwinvers, defines, incdirs, includes, sysroot = parse_cc_args(compiler_flags_64)
-		args.darwinvers = darwinvers.nil? ? _darwinvers : darwinvers
+		defines, incdirs, includes, sysroot = parse_cc_args(compiler_flags_64)
 		args.imports = includes + @imports
-		args.defines = defines + %w{__APPLE_CPP__=1} + %w{__BLOCKS__=1}
+		args.defines = defines
 		args.incdirs = incdirs + @incdirs
 		args.defaultincs = defaultincs
 		args.sysroot = sysroot
@@ -1014,23 +967,6 @@ class BridgeSupportGenerator
 	end
 	if @generate_format == FORMAT_DYLIB and @out_file.nil?
 	    raise "Generating dylib format requires an output file"
-	end
-
-	# Link against Foundation by default.
-	if @compiler_flags and @import_directive
-	    @imports.unshift('Foundation/Foundation.h')
-	    @import_directive.insert(0, "#import <Foundation/Foundation.h>\n")
-	    @compiler_flags << ' -framework Foundation '
-	    if prefix_sysroot.include?('iPhone') || prefix_sysroot.include?('AppleTV') || prefix_sysroot.include?('Watch')
-		@imports.unshift('UIKit/UIKit.h')
-		@import_directive.insert(0, "#import <UIKit/UIKit.h>\n")
-		@compiler_flags << ' -framework UIKit '
-	    end
-	    if prefix_sysroot.include?('MacOSX')
-		@imports.unshift('Cocoa/Cocoa.h')
-		@import_directive.insert(0, "#import <Cocoa/Cocoa.h>\n")
-		@compiler_flags << ' -framework Cocoa '
-	    end
 	end
 
 	# Open exceptions, ignore mentionned headers.
@@ -1340,7 +1276,7 @@ EOS
 #import <signal.h>
 #import <unistd.h>
 
-CFTypeRef _CFRuntimeCreateInstance(CFAllocatorRef allocator, CFTypeID typeID, #{TIGER_OR_BELOW ? 'uint32_t' : 'CFIndex'} extraBytes, unsigned char *category);
+CFTypeRef _CFRuntimeCreateInstance(CFAllocatorRef allocator, CFTypeID typeID, CFIndex extraBytes, unsigned char *category);
 
 static void
 sighandler(int sig)
@@ -2372,23 +2308,13 @@ EOS
 	tmp_bin_path = unique_tmp_path('bin')
 	tmp_log_path = unique_tmp_path('log')
 
-	arch_flag =
-	    # prefer building 32-bit
-	    if @enable_32
-		" -arch #{IS_PPC ? 'ppc' : 'i386'}"
-	    elsif emulate_ppc
-		' -arch ppc -arch i386'
-	    else
-		" -arch #{IS_PPC ? 'ppc64' : 'x86_64'} -arch arm64"
-	    end
-
-	line = "#{getcc()} #{arch_flag} #{tmp_src.path} -o #{tmp_bin_path} #{@compiler_flags} 2>#{tmp_log_path}"
+	line = "#{getcc()} #{tmp_src.path} -o #{tmp_bin_path} #{@compiler_flags} 2>#{tmp_log_path}"
 	#puts "compile_and_execute_code: #{line}" #DEBUG
 	#puts caller(1).join("\n") #DEBUG
 	while !system(line)
 	    r = File.read(tmp_log_path)
 	    if /built for GC-only/.match(r)
-		line = "#{getcc()} -fobjc-gc-only #{arch_flag} #{tmp_src.path} -o #{tmp_bin_path} #{@compiler_flags} 2>#{tmp_log_path}"
+		line = "#{getcc()} -fobjc-gc-only #{tmp_src.path} -o #{tmp_bin_path} #{@compiler_flags} 2>#{tmp_log_path}"
 		break if system(line)
 		r = File.read(tmp_log_path)
 	    end

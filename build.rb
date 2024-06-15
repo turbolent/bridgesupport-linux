@@ -1,4 +1,4 @@
-$:.unshift("./DSTROOT/System/Library/BridgeSupport/ruby-2.0")
+$:.unshift("./DSTROOT/System/Library/BridgeSupport/ruby-3.2")
 require_relative 'gen_bridge_metadata'
 require 'pathname'
 require 'fileutils'
@@ -16,9 +16,6 @@ WORKNARGS = 5
 
 dstroot = (ENV['DSTROOT'] or 'DSTROOT')
 
-HOST_VERSION = `/usr/bin/sw_vers -productVersion`.strip
-SDK_VERSION = HOST_VERSION.match(/(\d+\.\d+)/)[0]
-
 def measure(something)
   elapsed = Time.now
   yield
@@ -30,7 +27,7 @@ def work(fname, path, is_private, out_dir, out_file)
   # We have work!
   $stderr.puts "Generating BridgeSupport metadata for: #{fname} ..."
   elapsed = Time.now
-  
+
   # Create a new generator object, configure it accordingly for a first 32-bit pass.
   gen = BridgeSupportGenerator.new
   gen.frameworks << path
@@ -46,17 +43,8 @@ def work(fname, path, is_private, out_dir, out_file)
   #   end
   # end
 
-  a = SDK_VERSION.scan(/(\d+)\.(\d+)/)[0]
-  major = a[0].to_i
-  minor = a[1].to_i
-  if major <= 10 && minor <= 9
-    sdk_version_headers = "#{major}#{minor}0"
-  else
-    sdk_version_headers = "#{major}#{minor}00"
-  end
-
-  gen.private = true if is_private 
-  gen.compiler_flags = "-I. -isysroot / -mmacosx-version-min=#{SDK_VERSION} -DTARGET_OS_MAC=1 -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{fname}"
+  gen.private = true if is_private
+  gen.compiler_flags = "-I. -isysroot /"
 
   measure('Parse 32 and 64-bit') { gen.parse(true, true) }
   measure('Write final metadata') do
@@ -148,7 +136,7 @@ $workq = []
 
 frameworks.sort { |ary, ary2|
   # Sort the frameworks by dependency order, using a naive-but-working algorithm.
-  deps = [ary, ary2].map { |a| 
+  deps = [ary, ary2].map { |a|
     BridgeSupportGenerator.dependencies_of_framework(a[1]).map { |fpath|
       BridgeSupportGenerator.dependencies_of_framework(fpath)
     }.flatten
@@ -161,7 +149,7 @@ frameworks.sort { |ary, ary2|
   is_private = also_gen_private_metadata.include?(fname)
   file = "#{dir}/#{fname}#{is_private ? 'Private' : ''}.bridgesupport"
 
-  # Check if the bridge support file isn't already in the DSTROOT. 
+  # Check if the bridge support file isn't already in the DSTROOT.
   out_dir = File.join(dstroot, dir)
   out_file = File.join(dstroot, file)
   next if File.exist?(out_file) and File.size(out_file) > 0
@@ -191,7 +179,7 @@ def run
 end
 
 Thread.abort_on_exception = true
-ncpu = `sysctl -n hw.ncpu`.chomp.to_i
+ncpu = `nproc`.chomp.to_i
 raise "ncpu = #{ncpu}" unless ncpu > 0
 puts "ncpu = #{ncpu}"
 
